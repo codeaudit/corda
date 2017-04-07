@@ -95,7 +95,7 @@ abstract class Simulation(val networkSendManuallyPumped: Boolean,
             require(advertisedServices.containsType(NetworkMapService.type))
             val cfg = TestNodeConfiguration(
                     baseDirectory = config.baseDirectory,
-                    myLegalName = X500Name(DUMMY_MAP.name),
+                    myLegalName = DUMMY_MAP.name,
                     networkMapService = null)
             return object : SimulatedNode(cfg, network, networkMapAddr, advertisedServices, id, overrideServices, entropyRoot) {}
         }
@@ -108,7 +108,7 @@ abstract class Simulation(val networkSendManuallyPumped: Boolean,
             require(advertisedServices.containsType(SimpleNotaryService.type))
             val cfg = TestNodeConfiguration(
                     baseDirectory = config.baseDirectory,
-                    myLegalName = X500Name(DUMMY_NOTARY.name),
+                    myLegalName = DUMMY_NOTARY.name,
                     networkMapService = null)
             return SimulatedNode(cfg, network, networkMapAddr, advertisedServices, id, overrideServices, entropyRoot)
         }
@@ -146,7 +146,7 @@ abstract class Simulation(val networkSendManuallyPumped: Boolean,
                             entropyRoot: BigInteger): MockNetwork.MockNode {
             val cfg = TestNodeConfiguration(
                     baseDirectory = config.baseDirectory,
-                    myLegalName = X500Name(DUMMY_REGULATOR.name),
+                    myLegalName = DUMMY_REGULATOR.name,
                     networkMapService = null)
             return object : SimulatedNode(cfg, network, networkMapAddr, advertisedServices, id, overrideServices, entropyRoot) {
                 // TODO: Regulatory nodes don't actually exist properly, this is a last minute demo request.
