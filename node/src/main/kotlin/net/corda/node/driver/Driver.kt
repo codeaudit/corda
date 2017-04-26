@@ -452,7 +452,7 @@ class DriverDSL(
         val rpcAddress = portAllocation.nextHostAndPort()
         val webAddress = portAllocation.nextHostAndPort()
         val debugPort = if (isDebug) debugPortAllocation.nextPort() else null
-        val name = providedName ?: X509Utilities.getDevX509Name("${pickA(name)}-${p2pAddress.port}")
+        val name = providedName ?: X509Utilities.getDevX509Name("${pickA(name).commonName}-${p2pAddress.port}")
 
         val baseDirectory = driverDirectory / name.toString()
         val configOverrides = mapOf(
@@ -580,9 +580,9 @@ class DriverDSL(
 
     companion object {
         val name = arrayOf(
-                ALICE.name,
-                BOB.name,
-                DUMMY_BANK_A.name
+                X500Name(ALICE.name),
+                X500Name(BOB.name),
+                X500Name(DUMMY_BANK_A.name)
         )
 
         fun <A> pickA(array: Array<A>): A = array[Math.abs(Random().nextInt()) % array.size]
