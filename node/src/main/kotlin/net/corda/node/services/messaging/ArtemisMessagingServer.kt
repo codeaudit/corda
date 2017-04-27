@@ -238,8 +238,8 @@ class ArtemisMessagingServer(override val config: NodeConfiguration,
                 .loadCertificateFromKeyStore(config.keyStoreFile, config.keyStorePassword, CORDA_CLIENT_CA)
         val ourSubjectDN = X500Name(ourCertificate.subjectDN.name)
         // This is a sanity check and should not fail unless things have been misconfigured
-        require(ourSubjectDN.commonName == config.myLegalName) {
-            "Legal name does not match with our subject CN: $ourSubjectDN"
+        require(ourSubjectDN == X500Name(config.myLegalName)) {
+            "Legal name does not match with our certificate subject: $ourSubjectDN"
         }
         val defaultCertPolicies = mapOf(
                 PEER_ROLE to CertificateChainCheckPolicy.RootMustMatch,

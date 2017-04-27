@@ -14,6 +14,7 @@ import net.corda.core.div
 import net.corda.core.exists
 import net.corda.core.utilities.loggerFor
 import net.corda.nodeapi.config.SSLConfiguration
+import org.bouncycastle.asn1.x500.X500Name
 import java.nio.file.Path
 
 object ConfigHelper {
@@ -43,9 +44,9 @@ object ConfigHelper {
  * Strictly for dev only automatically construct a server certificate/private key signed from
  * the CA certs in Node resources. Then provision KeyStores into certificates folder under node path.
  */
-fun NodeConfiguration.configureWithDevSSLCertificate() = configureDevKeyAndTrustStores(myLegalName)
+fun NodeConfiguration.configureWithDevSSLCertificate() = configureDevKeyAndTrustStores(X500Name(myLegalName))
 
-fun SSLConfiguration.configureDevKeyAndTrustStores(myLegalName: String) {
+fun SSLConfiguration.configureDevKeyAndTrustStores(myLegalName: X500Name) {
     certificatesDirectory.createDirectories()
     if (!trustStoreFile.exists()) {
         javaClass.classLoader.getResourceAsStream("net/corda/node/internal/certificates/cordatruststore.jks").copyTo(trustStoreFile)
