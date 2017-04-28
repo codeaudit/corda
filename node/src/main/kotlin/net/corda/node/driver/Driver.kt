@@ -9,6 +9,7 @@ import com.typesafe.config.ConfigRenderOptions
 import net.corda.client.rpc.CordaRPCClient
 import net.corda.core.ThreadBox
 import net.corda.core.crypto.Party
+import net.corda.core.crypto.commonName
 import net.corda.core.div
 import net.corda.core.flatMap
 import net.corda.core.map
@@ -30,6 +31,7 @@ import net.corda.nodeapi.config.SSLConfiguration
 import net.corda.nodeapi.config.parseAs
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.bouncycastle.asn1.x500.X500Name
 import org.slf4j.Logger
 import java.io.File
 import java.net.*
@@ -427,8 +429,13 @@ class DriverDSL(
         val webAddress = portAllocation.nextHostAndPort()
         val debugPort = if (isDebug) debugPortAllocation.nextPort() else null
         val name = providedName ?: "${pickA(name)}-${p2pAddress.port}"
+        val nodeDirectoryName = try {
+            X500Name(name).commonName
+        } catch(ex: IllegalArgumentException) {
+            name
+        }
 
-        val baseDirectory = driverDirectory / name
+        val baseDirectory = driverDirectory / nodeDirectoryName
         val configOverrides = mapOf(
                 "myLegalName" to name,
                 "p2pAddress" to p2pAddress.toString(),
@@ -476,7 +483,14 @@ class DriverDSL(
             rpcUsers: List<User>
     ): ListenableFuture<Pair<Party, List<NodeHandle>>> {
         val nodeNames = (1..clusterSize).map { "${DUMMY_NOTARY.name} $it" }
-        val paths = nodeNames.map { driverDirectory / it }
+        val nodeDirNames = nodeNames.map {
+            try {
+                X500Name(it).commonName
+            } catch(ex: IllegalArgumentException) {
+                it
+            }
+        }
+        val paths = nodeDirNames.map { driverDirectory / it }
         ServiceIdentityGenerator.generateToDisk(paths, type.id, notaryName)
 
         val serviceInfo = ServiceInfo(type, notaryName)
@@ -533,7 +547,12 @@ class DriverDSL(
     override fun startNetworkMapService() {
         val debugPort = if (isDebug) debugPortAllocation.nextPort() else null
         val apiAddress = portAllocation.nextHostAndPort().toString()
-        val baseDirectory = driverDirectory / networkMapLegalName
+        val nodeDirName = try {
+            X500Name(networkMapLegalName).commonName
+        } catch(ex: IllegalArgumentException) {
+            networkMapLegalName
+        }
+        val baseDirectory = driverDirectory / nodeDirName
         val config = ConfigHelper.loadConfig(
                 baseDirectory = baseDirectory,
                 allowMissingConfig = true,
